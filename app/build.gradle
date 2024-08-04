@@ -17,7 +17,7 @@ hipoom {
         enable = true
 
         // 黑名单 - 官方库中的类，不参与插桩，提高效率
-        blacklist.prefix = ["kotlin.", "kotlinx.", "com.android.", "androidx.", "com.hipoom.performance"]
+        blacklist.prefix = ["kotlin.", "kotlinx.", "com.android.", "androidx.", "com.hipoom."]
 
         // 黑名单 - 类似于 .R$id、.R$layout 这些类，不参与插桩
         blacklist.contains = [".R\$"]
@@ -39,7 +39,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.hipoom.registry"
+        applicationId "com.hipoom.performance"
         minSdkVersion 21
         targetSdkVersion 34
         versionCode 1
@@ -76,6 +76,9 @@ dependencies {
     implementation 'com.hipoom:hook-adapter:0.0.1'
     implementation 'com.hipoom:hook-adapter-pine:0.0.1'
     implementation 'com.hipoom:hook:0.0.1'
+
+    implementation "com.hipoom:holder:0.0.1"
+    implementation "com.hipoom:function:0.0.1"
 
     implementation project(":performance")
 }

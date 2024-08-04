@@ -3,13 +3,12 @@ package com.hipoom.performance;
 import android.os.Bundle;
 
 import android.util.Log;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.hipoom.hook.JavaHook;
 import com.hipoom.hook.adapter.pine.PineInitializer;
+import com.hipoom.performance.timing.Config;
+import com.hipoom.performance.timing.Indent;
 import com.hipoom.performance.timing.TimingRecorder;
-import com.hipoom.performance.timing.TimingRecorder.Frame;
-import com.hipoom.performance.timing.TimingRecorder.Listener;
+import com.test.TestTimingRecording;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,11 +41,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TimingRecorder.onFramePopListener = (depth, frame) -> Log.i("ZHP_TEST",
-            "[" + depth + "] " + frame.methodDescription + " 执行完毕，耗时: " + (frame.endTime
-                - frame.beginTime) + " 毫秒.");
+        TimingRecorder.init(this, new Config(
+            0,
+            1000,
+            true
+        ));
+
+        //TimingRecorder.onFramePopListeners.add((depth, frame) -> {
+        //    Log.i(
+        //        "ZHP_TEST",
+        //        Indent.of(depth) + frame.getMethodDescription() + " 执行完毕，耗时: " + frame.getCostMills() + " 毫秒."
+        //    );
+        //});
+
 
         // 初始化 Pine Hook Style
         PineInitializer.init();
+
+        TestTimingRecording.test();
     }
 }

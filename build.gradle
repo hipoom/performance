@@ -19,5 +19,9 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+
+        maven {
+            url "/Users/zhp/Workspace/hipoom-maven-3"
+        }
     }
 }

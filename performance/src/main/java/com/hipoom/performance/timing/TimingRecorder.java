@@ -1,9 +1,15 @@
 package com.hipoom.performance.timing;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Stack;
 
-import android.os.SystemClock;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.os.Process;
+import android.util.Log;
 import androidx.annotation.NonNull;
+import com.hipoom.holder.Callbacks;
 
 /**
  * @author ZhengHaiPeng
@@ -20,18 +26,73 @@ public class TimingRecorder {
     */
    private static final ThreadLocal<Stack<Frame>> stacks = new ThreadLocal<>();
 
-   public static Listener onFramePopListener = null;
+   /**
+    * 方法执行完毕的回调。
+    */
+   public static final Callbacks<Listener> onFramePopListeners = new Callbacks<>();
 
+   /**
+    * Whether to save timing's into file or not.
+    * The default value is true.
+    * Your can change this value by calling {@link #startSave} or {@link #stopSave}.
+    */
+   private static boolean needSave = true;
+
+   /**
+    * Only method call that take longer than this field will be record.
+    */
+   private static long minCostForRecord = 0L;
+
+   private static boolean needPrintLogcat = false;
+
+   private static long initTimestamp = 0L;
 
 
    /* ======================================================= */
    /* Public Methods                                          */
    /* ======================================================= */
 
+   /**
+    * @param context 用于获取磁盘目录。
+    */
+   public static void init(@NonNull Context context, @NonNull Config config) {
+      initTimestamp = System.currentTimeMillis();
+      minCostForRecord = config.getRecordThresholdMills();
+      needPrintLogcat = config.getNeedPrintLogcat();
+
+      int pid = Process.myPid();
+      @SuppressLint("SimpleDateFormat")
+      SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日HH时mm分ss秒");
+      String date = sdf.format(initTimestamp);
+
+      File workspace = context.getExternalFilesDir("hipoom/performance/timing/" + date + "/" + pid);
+      assert workspace != null;
+      Log.i("Hipoom-Performance", "workspace: " + workspace.getAbsolutePath());
+      TimingInfoSaver.init(workspace, config);
+   }
+
+   /**
+    * Stop saving the timing's info.
+    */
+   public static void stopSave() {
+      needSave = false;
+   }
+
+   /**
+    * Star saving the timing's info.
+    */
+   public static void startSave() {
+      needSave = true;
+   }
+
+   /**
+    * 这个方法是由 processor 在编译时插桩调用的。
+    */
    public static void push(@NonNull String methodDescription) {
-      Frame frame = new Frame();
-      frame.beginTime = SystemClock.elapsedRealtime();
-      frame.methodDescription = methodDescription;
+      Frame frame = Frame.obtain();
+      frame.setBeginMills(System.currentTimeMillis());
+      frame.setMethodDescription(methodDescription);
+
       Stack<Frame> stack = stacks.get();
       if (stack == null) {
          stack = new Stack<>();
@@ -40,43 +101,41 @@ public class TimingRecorder {
       stack.push(frame);
    }
 
+   /**
+    * 这个方法是由 processor 在编译时插桩调用的。
+    */
    public static void pop() {
-      final long now = SystemClock.elapsedRealtime();
+      final long now = System.currentTimeMillis();
       Stack<Frame> stack = stacks.get();
       if (stack == null) {
          return;
       }
 
       Frame frame = stack.pop();
-      frame.endTime = now;
+      frame.setEndMills(now);
 
-      Listener listener = onFramePopListener;
-      if (listener != null) {
-         listener.onFramePop(stack.size(), frame);
+      // 回调每一个监听者
+      onFramePopListeners.notifyAll(l -> l.onFramePop(stack.size(), frame));
+
+      // save timing into file.
+      if (needSave && frame.getCostMills() >= minCostForRecord) {
+         TimingInfoSaver.INSTANCE.appendBuffer(
+             now,
+             now - initTimestamp,
+             Thread.currentThread(),
+             stack.size(),
+             frame.getMethodDescription(),
+             frame.getCostMills()
+         );
       }
-   }
 
+      if (needPrintLogcat) {
+         String msg = "[" + stack.size() + "] " + frame.getMethodDescription() + " : " + frame.getCostMills();
+         Log.i("Hipoom-Performance", "[Timing] " + msg);
+      }
 
-
-   /* ======================================================= */
-   /* Inner Class                                             */
-   /* ======================================================= */
-
-   /**
-    * TODO: 这里的 Frame 应该用享元模式优化。后续优化...
-    */
-   public static class Frame {
-
-      public long beginTime;
-
-      public long endTime;
-
-      public String methodDescription;
-
-   }
-
-   public interface Listener {
-      void onFramePop(int depth, @NonNull Frame frame);
+      // recycle to object pool
+      frame.recycle();
    }
 
 }
