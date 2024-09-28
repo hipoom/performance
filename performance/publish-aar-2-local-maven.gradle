@@ -23,7 +23,7 @@ static String getProductArtifactId() {
  * 版本号。
  */
 static String getProductVersion() {
-    return "0.0.3"
+    return "0.0.4"
 }
 
 static String getAarFileName() {
@@ -118,7 +118,7 @@ publishing {
                         scm {
                             connection = "no-connection"
                             developerConnection = "no-developerConnection"
-                            url = "no-url"
+                            url = "https://hipoom.com"
                         }
                     }
                 }

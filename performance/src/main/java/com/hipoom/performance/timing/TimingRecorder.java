@@ -27,7 +27,7 @@ public class TimingRecorder {
    private static final ThreadLocal<Stack<Frame>> stacks = new ThreadLocal<>();
 
    /**
-    * 方法执行完毕的回调。
+    * 每一个方法执行完毕的回调。
     */
    public static final Callbacks<Listener> onFramePopListeners = new Callbacks<>();
 
@@ -39,7 +39,7 @@ public class TimingRecorder {
    private static boolean needSave = true;
 
    /**
-    * Only method call that take longer than this field will be record.
+    * Only methods call that take longer than this field will be record.
     */
    private static long minCostForRecord = 0L;
 
@@ -53,22 +53,38 @@ public class TimingRecorder {
    /* ======================================================= */
 
    /**
+    * 初始化。
+    * 将创建好日志保存目录，日志会被保存到以下两个文件中：
+    * (1) ${workspace}/main.txt, 这里保存的是主线程的日志。
+    * (2) ${workspace}/timings.txt, 这里保存的是所有线程（包括主线程的日志）。
+    * 其中，${workspace} 是当前函数的返回值。
+    * <br/>
+    * 多次调用这个函数不会导致功能异常。 但是会刷新 initTimestamp.
+    *
     * @param context 用于获取磁盘目录。
+    * @return 本次初始化的日志文件。
     */
-   public static void init(@NonNull Context context, @NonNull Config config) {
+   @NonNull
+   public static File init(@NonNull Context context, @NonNull Config config) {
       initTimestamp = System.currentTimeMillis();
       minCostForRecord = config.getRecordThresholdMills();
       needPrintLogcat = config.getNeedPrintLogcat();
 
+      // 获取当前进程号
       int pid = Process.myPid();
       @SuppressLint("SimpleDateFormat")
       SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日HH时mm分ss秒");
       String date = sdf.format(initTimestamp);
 
+      // 拼接日志文件保存目录
       File workspace = context.getExternalFilesDir("hipoom/performance/timing/" + date + "/" + pid);
       assert workspace != null;
       Log.i("Hipoom-Performance", "workspace: " + workspace.getAbsolutePath());
+
+      // 初始化日志保存
       TimingInfoSaver.init(workspace, config);
+
+      return workspace;
    }
 
    /**

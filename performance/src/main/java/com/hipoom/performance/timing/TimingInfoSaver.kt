@@ -46,11 +46,19 @@ internal object TimingInfoSaver {
     /* Public Methods                                          */
     /* ======================================================= */
 
+    /**
+     * 初始化日志保存路径。
+     * 日志将会被保存到两个位置：
+     * (1) ${workspace}/main.txt, 这里保存的是主线程的日志。
+     * (2) ${workspace}/timings.txt, 这里保存的是所有线程（包括主线程的日志）。
+     *
+     * 多次调用这个函数不会导致功能异常。
+     */
     @JvmStatic
     fun init(workspace: File, config: Config) {
         this.workspace = workspace
 
-        // If init be called multiple times, the old timer needs to be canceled.
+        // If init() is called multiple times, the old timer should be canceled.
         this.timer?.cancel()
 
         // Start a timer

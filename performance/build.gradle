@@ -57,4 +57,9 @@ dependencies {
     implementation "com.hipoom:holder:0.0.2"
     implementation "com.hipoom:function:0.0.1"
     implementation "com.hipoom:files:0.0.3"
+
+    // 为了减少包体积，这些非必要功能，都是可选的，handler 模块会用到这些类。
+//    compileOnly 'com.hipoom:hook-adapter:0.0.1'
+//    compileOnly 'com.hipoom:hook-adapter-pine:0.0.1'
+//    compileOnly 'com.hipoom:hook:0.0.1'
 }

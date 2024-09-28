@@ -2,15 +2,20 @@ package com.hipoom.performance;
 
 import android.os.Bundle;
 
-import android.util.Log;
+import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
 import com.hipoom.hook.adapter.pine.PineInitializer;
+import com.hipoom.performance.looper.LooperUtils;
 import com.hipoom.performance.timing.Config;
-import com.hipoom.performance.timing.Indent;
 import com.hipoom.performance.timing.TimingRecorder;
 import com.test.TestTimingRecording;
 
 public class MainActivity extends AppCompatActivity {
+
+    static {
+        LooperUtils.INSTANCE.replaceMainLooper();
+        LooperUtils.INSTANCE.enableMessageTiming();
+    }
 
     public static class TestClass {
 
@@ -54,9 +59,11 @@ public class MainActivity extends AppCompatActivity {
         //    );
         //});
 
+        Handler handler;
+
 
         // 初始化 Pine Hook Style
-        PineInitializer.init();
+         PineInitializer.init();
 
         TestTimingRecording.test();
     }
