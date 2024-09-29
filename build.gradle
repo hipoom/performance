@@ -20,6 +20,11 @@ allprojects {
         google()
         mavenCentral()
 
+        // 为了引入 FreeReflect，需要添加 jitpack 仓库
+        maven {
+            url 'https://jitpack.io'
+        }
+
         maven {
             url "/Users/zhp/Workspace/hipoom-maven-3"
         }

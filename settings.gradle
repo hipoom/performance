@@ -1,5 +1,4 @@
 rootProject.name = "performance"
 include ':app'
 include ':performance'
-// include ':hook-adapter'
-// include ':hook-adapter-pine'
+include ':main-tracer'

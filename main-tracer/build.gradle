@@ -1,0 +1,72 @@
+plugins {
+    id 'com.android.library'
+    id "kotlin-android"
+    id "kotlin-android-extensions"
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled false
+
+        dexOptions {
+            javaMaxHeapSize "4g"
+        }
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            zipAlignEnabled false
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    aaptOptions.cruncherEnabled = false
+    aaptOptions.useNewCruncher = false
+
+    android {
+        lintOptions {
+            abortOnError false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+}
+
+
+// 这一行一定要放到 「android」 后面，否则会出现报错「Extension not initialized yet, couldn't access compileSdkVersion.」
+apply from: "publish-aar-2-local-maven.gradle"
+
+dependencies {
+    implementation "androidx.annotation:annotation:1.4.0"
+    implementation "com.hipoom:holder:0.0.2"
+    implementation "com.hipoom:function:0.0.1"
+    implementation "com.hipoom:files:0.0.3"
+
+    implementation 'com.hipoom:hook:0.0.1'
+    implementation 'com.hipoom:performance:0.0.5'
+
+    // 添加这个依赖，是为了绕过隐藏 API 无法反射的限制。
+    // 由于我们需要 hook MessageQueue 的 enqueueMessage 方法，所以需要访问到这个隐藏的 api.
+    implementation 'com.github.tiann:FreeReflection:3.2.0'
+
+    // 为了减少包体积，这些非必要功能，都是可选的，handler 模块会用到这些类。
+//    compileOnly 'com.hipoom:hook-adapter:0.0.1'
+//    compileOnly 'com.hipoom:hook-adapter-pine:0.0.1'
+//    compileOnly 'com.hipoom:hook:0.0.1'
+}

@@ -3,68 +3,30 @@ package com.hipoom.performance;
 import android.os.Bundle;
 
 import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import com.hipoom.hook.adapter.pine.PineInitializer;
-import com.hipoom.performance.looper.LooperUtils;
-import com.hipoom.performance.timing.Config;
-import com.hipoom.performance.timing.TimingRecorder;
-import com.test.TestTimingRecording;
+import com.hipoom.performance.looper.main.record.trace.MainLooperTracer;
+import top.canyie.pine.PineConfig;
 
 public class MainActivity extends AppCompatActivity {
-
-    static {
-        LooperUtils.INSTANCE.replaceMainLooper();
-        LooperUtils.INSTANCE.enableMessageTiming();
-    }
-
-    public static class TestClass {
-
-        TestClass()            {}
-
-        TestClass(String name) {}
-
-        public void objFun() {
-
-        }
-
-        public void objFun(String name) {
-
-        }
-
-        public static void staticMethod() {
-
-        }
-
-        public static void staticMethod(String name) {
-
-        }
-    }
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TimingRecorder.init(this, new Config(
-            0,
-            1000,
-            true
-        ));
+        PineInitializer.init();
+        PineConfig.debug = false;
+        PineConfig.debuggable = true;
 
-        //TimingRecorder.onFramePopListeners.add((depth, frame) -> {
-        //    Log.i(
-        //        "ZHP_TEST",
-        //        Indent.of(depth) + frame.getMethodDescription() + " 执行完毕，耗时: " + frame.getCostMills() + " 毫秒."
-        //    );
-        //});
+        // MainLooperTracer.INSTANCE.startRecord(this);
 
-        Handler handler;
+        MainLooperTracer.INSTANCE.registryBroadcastReceiver(this);
 
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            Log.i("ZHP_TEST", "这是主动加的消息，堆栈：\n" + Log.getStackTraceString(new Throwable()));
+        }, 3000);
 
-        // 初始化 Pine Hook Style
-         PineInitializer.init();
-
-        TestTimingRecording.test();
     }
 }

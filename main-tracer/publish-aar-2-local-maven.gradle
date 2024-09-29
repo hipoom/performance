@@ -16,18 +16,18 @@ static String getLocalRepositoryDirectory() {
  * 模块名.
  */
 static String getProductArtifactId() {
-    return "performance"
+    return "performance-main-tracer"
 }
 
 /**
  * 版本号。
  */
 static String getProductVersion() {
-    return "0.0.5"
+    return "0.0.1"
 }
 
 static String getAarFileName() {
-    return "performance-release.aar"
+    return "main-tracer-release.aar"
 }
 
 // 配置签名，上传到 central maven 必须要签名
