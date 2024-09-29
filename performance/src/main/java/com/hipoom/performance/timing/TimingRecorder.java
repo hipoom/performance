@@ -73,7 +73,7 @@ public class TimingRecorder {
       // 获取当前进程号
       int pid = Process.myPid();
       @SuppressLint("SimpleDateFormat")
-      SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日HH时mm分ss秒");
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH_mm_ss.SSS");
       String date = sdf.format(initTimestamp);
 
       // 拼接日志文件保存目录
